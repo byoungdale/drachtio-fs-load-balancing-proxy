@@ -14,48 +14,58 @@ const passwordLookup = (username, realm, callback) => {
   // do your lookup here
   // then return password
   callback(null, password);
-}
+};
 
 srf.connect(config.get('drachtioServer'));
 
 srf.on('connect', (err, hostport) => {
-  if (error) return logger.error(`error connecting to drachtio: ${err}`);
+  if (err) return logger.error(`error connecting to drachtio: ${err}`);
   logger.info(`connected to drachtio listening for SIP on ${hostport}`);
-}) 
-.on('error', (err) => {
-  logger.error(`srf error: ${err.message}`);
-});
+})
+  .on('error', (err) => {
+    logger.error(`srf error: ${err.message}`);
+  });
 
 
 const checkSender = (req, res, next) => {
-  if( !rangeCheck.inRange( req.source_address, config.get('authorizedSources')) ) { 
-    return res.send(403); 
+  if (!rangeCheck.inRange(req.source_address, config.get('authorizedSources'))) {
+    return res.send(403);
   }
   next() ;
-}
+};
 
-const inviteDigestAuth = digestAuth({
-  proxy: true
+const challenge = digestAuth({
+  proxy: true,
   realm: sipRealm,
-  passwordLookup: passwordLookup(username, realm, callback)
+  passwordLookup: (username, realm, callback) => {
+    passwordLookup(username, realm, callback);
+  }
 });
 
 const auth = config.get('authSettings');
 const inviteMiddlewareList = [];
 
-/* add invite authentication middleware if auth settings for invites is set to true */
-if (auth.invite) {
-  inviteMiddlewareList.push(inviteDigestAuth);
-}
-
 /* optionally provide access control */
-if( _.isArray( config.has('authorizedSources') ) && config.get('authorizedSources').length > 1) {
+if (Array.isArray(config.has('authorizedSources')) && config.get('authorizedSources').length > 1) {
   inviteMiddlewareList.push(checkSender);
 }
 
 // optionally detect SIP scanners and blackhole them
-if( config.blacklist && config.blacklist.chain ) {
-  inviteMiddlewarList.push(blacklist({ logger: logger, chain: config.blacklist.chain, realm: config.blacklist.chain }));
+if (config.blacklist && config.blacklist.chain) {
+  inviteMiddlewareList.push(blacklist({
+    logger: logger,
+    chain: config.blacklist.chain,
+    realm: config.blacklist.chain
+  }));
+}
+
+/* add invite authentication middleware if auth settings for invites is set to true */
+if (auth.invite) {
+  inviteMiddlewareList.push(challenge);
+}
+
+if (auth.register) {
+  srf.use('register', challenge);
 }
 
 /* set all middleware on 'invite' */
@@ -63,6 +73,3 @@ srf.use('invite', inviteMiddlewareList);
 
 srf.invite(proxy);
 srf.register(proxy);
-
-// Expose app
-exports = module.exports = app;

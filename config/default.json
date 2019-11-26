@@ -1,45 +1,46 @@
 {
-  drachtioServer: {
-    address: '127.0.0.1',
-    port: 9022,
-    secret: 'cymru'
+  "drachtioServer": {
+    "address": "127.0.0.1",
+    "port": 9022,
+    "secret": "cymru"
   },
-  autSettings: {
-	invite: true
+  "autSettings": {
+    "invite": true,
+    "register": false
   },
-  targets: [
+  "targets": [
     {
-      address: 'ip-address-server1',
-      port: 8021,          
-      secret: 'ClueCon',   
-      profile: 'external', 
-      enabled: true        
+      "address": "ip-address-server1",
+      "port": 8021,          
+      "secret": "ClueCon",   
+      "profile": "external", 
+      "enabled": true        
     },
     {
-      address: 'ip-address-server2',
-      port: 8021,         
-      secret: 'ClueCon',  
-      profile: 'external',
-      enabled: true
+      "address": "ip-address-server2",
+      "port": 8021,         
+      "secret": "ClueCon",  
+      "profile": "external",
+      "enabled": true
     }
   ], 
-  localAddress: '127.0.0.1',
-  maxTargets: 2, 
-  authorizedSources: [
-	'68.64.80.0/24'
+  "localAddress": "127.0.0.1",
+  "maxTargets": 2, 
+  "authorizedSources": [
+    "68.64.80.0/24"
   ],
-  blacklist: {                           
-    chain: 'LOGDROP',
-    realm: 'sip.acme.com',
-    checks: {
+  "blacklist": {                           
+    "chain": "LOGDROP",
+    "realm": "sip.acme.com",
+    "checks": {
       "User-Agent": [
-		"sip-cli",
-		"friendly-scanner",
-		"Asterisk PBX"
-	  ],
+		    "sip-cli",
+		    "friendly-scanner",
+		    "Asterisk PBX"
+	    ],
       "To": [
-		"sipvicious"
-	  ]
-	}
+		    "sipvicious"
+	    ]
+	  }
   }
 }
